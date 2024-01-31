@@ -4,6 +4,8 @@ import {isRenderer, isMain} from './utils/isRenderer'
 import {nameFormat} from './utils/nameFormat'
 import {config as ipcConfig} from './IpcConfig'
 
+type Obj = Record<string, never>
+
 const electronMain: {
   ipcMain?: Electron.IpcMain
 } = {};
@@ -40,9 +42,9 @@ function Receiver<T>(Target: new () => T): {[key in keyof T]: (config?: IpcMainM
   const middlewaredObject: Record<string, Function> = {}
 
   // DEPENDENCY INJECTION
-  Object.keys(target as Object)
+  Object.keys(target as Obj)
     .forEach(key => {
-      const member = target[key]
+      const member = (target as Obj)[key]
       if (typeof member !== 'undefined') return
 
       const depsKey = [...ipcMainProperties.dependencies.keys()].find(obj => obj.constructor === Target)
@@ -54,7 +56,7 @@ function Receiver<T>(Target: new () => T): {[key in keyof T]: (config?: IpcMainM
       if (deps) {
         const dependency = [...deps].find((dep) => dep[0] === key)?.[1]
         if (!dependency) return
-        dependency().then(v => target[key] = v)
+        dependency().then(v => (target as Obj)[key] = v as never)
       }
     })
 
@@ -62,7 +64,7 @@ function Receiver<T>(Target: new () => T): {[key in keyof T]: (config?: IpcMainM
   Object.getOwnPropertyNames(Object.getPrototypeOf(target))
     .forEach(name => {
       if (name === 'constructor') return
-      const method = target[name]
+      const method = (target as Obj)[name] as ((...args: any[]) => void)
       const eventName = nameFormat(Target.name + ':' + name)
       ipcMainProperties.methods.set(method, eventName)
       middlewaredObject[`${name}`] = async (config?: IpcMainMiddlewareConfig) => {
@@ -119,7 +121,7 @@ function Sender<T>(Target: new () => T): IpcMainSenderReturn<T> {
   Object.getOwnPropertyNames(Object.getPrototypeOf(target))
     .forEach(name => {
       if (name === 'constructor') return
-      const method = target[name]
+      const method = (target as Obj)[name] as ((...args: any[]) => void)
       const eventName = nameFormat(Target.name + ':' + name)
       ipcMainProperties.senderMethods.set(method, eventName)
 
@@ -150,7 +152,7 @@ function Sender<T>(Target: new () => T): IpcMainSenderReturn<T> {
 
 function Autowired<T>(module: () => Promise<T>) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return (target, name) => {
+  return (target: (() => Promise<any>), name: string) => {
     if (isRenderer()) return
     const deps = ipcMainProperties.dependencies.get(target)
     if(deps) {

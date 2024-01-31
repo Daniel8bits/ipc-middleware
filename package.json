@@ -2,7 +2,7 @@
   "name": "ipc-middleware",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -11,6 +11,19 @@
   "license": "ISC",
   "dependencies": {
     "@electron-toolkit/preload": "^3.0.0",
-    "electron": "^28.2.0"
-  }
+    "electron": "^28.2.0",
+    "typescript": "^5.3.3"
+  },
+  "main": "./dist/ipc-middleware.umd.cjs",
+  "module": "./dist/ipc-middleware.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/ipc-middleware.js",
+      "require": "./dist/ipc-middleware.umd.cjs"
+    }
+  },
+  "files": [
+    "dist"
+  ]
 }
