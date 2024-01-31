@@ -14,13 +14,13 @@
     "electron": "^28.2.0",
     "typescript": "^5.3.3"
   },
-  "main": "./dist/ipc-middleware.umd.cjs",
-  "module": "./dist/ipc-middleware.js",
-  "types": "./dist/index.d.ts",
+  "main": "./dist/src/index.js",
+  "module": "./dist/src/index.js",
+  "types": "./dist/src/index.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/ipc-middleware.js",
-      "require": "./dist/ipc-middleware.umd.cjs"
+      "import": "./dist/src/index.js",
+      "require": "./dist/src/index.js"
     }
   },
   "files": [
